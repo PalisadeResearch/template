@@ -31,16 +31,25 @@ jobs:
           github_access_token: ${{ github.token }}
 
       - run: ninja paper
+
       - uses: actions/upload-artifact@v4
         with:
-          name: paper
-          path: paper/main.pdf
+          name: paper-latex
+          path: paper-latex/main.pdf
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paper-typst
+          path: paper-typst/main.pdf
 
       - name: Upload paper to release
         if: github.ref == 'refs/heads/main'
         run: |
           gh release delete --cleanup-tag -y main || true
-          gh release create main paper/main.pdf
+          mkdir out
+          cp paper-latex/main.pdf out/latex.pdf
+          cp paper-typst/main.pdf out/typst.pdf
+          gh release create main out/*
 
   check-figures:
     name: Check figures
@@ -59,7 +68,7 @@ jobs:
 
       - name: Check if figures are up to date
         run: |
-          if [ -n "$(git status --porcelain figures/)" ]; then
+          if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Figures are out of date. Please rebuild figures and commit the changes."
             git diff --name-only
             exit 1
