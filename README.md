@@ -29,6 +29,8 @@ echo 'source $HOME/.nix-profile/share/nix-direnv/direnvrc' >> ~/.config/direnv/d
 nix profile install nixpkgs#pre-commit
 ```
 
+If something goes wrong, cross-check your setup against this [GitHub Action](.github/workflows/setup-toolchain.yml).
+
 ### Project setup
 
 After cloning the repository, run:
