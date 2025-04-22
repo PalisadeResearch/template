@@ -23,7 +23,3 @@ select = [
     "SIM", # flake8-simplify
     "I", # isort
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
