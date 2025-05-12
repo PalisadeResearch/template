@@ -23,7 +23,6 @@
             ninja
             nixfmt-rfc-style
             nodejs # remote-mcp, browser apps
-            python3Packages.python-dotenv
             texlive.combined.scheme-medium
             typst
             uv
