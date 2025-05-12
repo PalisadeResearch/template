@@ -18,13 +18,15 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            ninja
-            uv
-            typst
-            texlive.combined.scheme-medium
+            git
             nil
+            ninja
             nixfmt-rfc-style
-            nodejs # remote-mcp
+            nodejs # remote-mcp, browser apps
+            python3Packages.python-dotenv
+            texlive.combined.scheme-medium
+            typst
+            uv
           ];
         };
       }
