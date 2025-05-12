@@ -27,3 +27,7 @@ repos:
         language: system
         types_or: [python, pyi, jupyter]
         require_serial: true
+
+# pre-commit.ci SaaS does not have our Nix environment so we skip Nix-packaged hooks
+ci:
+  skip: [nixfmt, uv-lock, ruff, ruff-format]
