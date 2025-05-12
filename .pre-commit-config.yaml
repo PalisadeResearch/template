@@ -8,3 +8,12 @@ repos:
     hooks:
       - id: ruff
       - id: ruff-format
+  - repo: local
+    hooks:
+      - id: nixfmt-local
+        name: nixfmt-local
+        entry: nixfmt
+        language: system
+        types: [nix]
+        # args: []
+        # require_serial: false
