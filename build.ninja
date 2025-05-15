@@ -1,5 +1,5 @@
 rule uv_sync
-  command = uv sync --all-packages --dev
+  command = uv sync --all-extras --all-packages --dev
 
 rule figure
   command = python3 $in $out
