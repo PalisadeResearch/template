@@ -9,7 +9,7 @@ rule latexmk
   description = Building $out with latexmk
 
 rule typst_compile
-  command = typst compile $in $out
+  command = typst compile --ignore-system-fonts $in $out
 
 build .venv: uv_sync
 
