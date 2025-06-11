@@ -1,0 +1,44 @@
+name: Claude Simple Push Check
+
+on:
+  push:
+    branches:
+      - '**'  # Triggers on push to any branch
+
+jobs:
+  claude-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Fetch at least 2 commits to enable diff
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # For push events, we can use git show to get changed files
+          echo "files=$(git show --name-only --pretty=format: ${{ github.sha }} | grep -v '^$' | head -20 | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+      - name: Run Claude Code Base Action
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: |
+            This is an automated check triggered by a push to the repository.
+            
+            Repository: ${{ github.repository }}
+            Commit SHA: ${{ github.sha }}
+            Changed files: ${{ steps.changed-files.outputs.files }}
+            
+            Please perform a simple analysis:
+            1. Briefly describe what you observe about this repository's structure and purpose
+            2. If you can see the changed files, comment on what was modified
+            3. Suggest one simple, non-critical improvement for code quality or organization
+            
+            Keep your response brief and constructive. This is just a test integration.
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "View,GlobTool,GrepTool"
+          timeout_minutes: "5" 
