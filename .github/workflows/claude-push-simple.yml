@@ -24,6 +24,7 @@ jobs:
           echo "files=$(git show --name-only --pretty=format: ${{ github.sha }} | grep -v '^$' | head -20 | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Run Claude Code Base Action
+        id: claude-analysis
         uses: anthropics/claude-code-base-action@beta
         with:
           prompt: |
@@ -33,12 +34,118 @@ jobs:
             Commit SHA: ${{ github.sha }}
             Changed files: ${{ steps.changed-files.outputs.files }}
             
-            Please perform a simple analysis:
-            1. Briefly describe what you observe about this repository's structure and purpose
-            2. If you can see the changed files, comment on what was modified
-            3. Suggest one simple, non-critical improvement for code quality or organization
+            Please perform a comprehensive analysis:
             
-            Keep your response brief and constructive. This is just a test integration.
+            1. **Repository Overview**: Describe what you observe about this repository's structure and purpose
+            
+            2. **Change Analysis**: If you can see the changed files, provide detailed comments on what was modified
+            
+            3. **Code Quality Assessment**: 
+               - Check for potential issues like missing error handling, inconsistent naming conventions
+               - Identify opportunities for refactoring
+               - Verify adherence to best practices
+            
+            4. **Research-Specific Checks**:
+               - Does the code follow reproducibility guidelines?
+               - Do data processing changes maintain scientific validity?
+               - Are there improvements needed for analysis scripts or visualization code?
+            
+            5. **Documentation Review**: 
+               - Are the changes properly documented?
+               - Does documentation need to be updated to reflect code changes?
+            
+            6. **Recommendations**: Provide actionable suggestions for improvement
+            
+            Format your response in a clear, structured manner suitable for email delivery.
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_tools: "View,GlobTool,GrepTool"
-          timeout_minutes: "5" 
+          timeout_minutes: "5"
+
+      - name: Extract Claude's Response
+        id: extract-response
+        run: |
+          # Check if execution file exists and extract Claude's response
+          if [ -f "${{ steps.claude-analysis.outputs.execution_file }}" ]; then
+            echo "Execution file found at: ${{ steps.claude-analysis.outputs.execution_file }}"
+            
+            # Extract Claude's text response from the execution log
+            # The structure is: {"type": "assistant", "message": {"content": [{"type": "text", "text": "..."}]}}
+            CLAUDE_RESPONSE=$(cat "${{ steps.claude-analysis.outputs.execution_file }}" | jq -r '
+              .[] | 
+              select(.type == "assistant") | 
+              .message.content[] | 
+              select(.type == "text") | 
+              .text
+            ' 2>/dev/null | tail -1 || echo "Unable to parse Claude response")
+            
+            # If the above doesn't work, try alternative extraction
+            if [ "$CLAUDE_RESPONSE" = "Unable to parse Claude response" ] || [ -z "$CLAUDE_RESPONSE" ]; then
+              echo "Trying alternative extraction method..."
+              CLAUDE_RESPONSE=$(cat "${{ steps.claude-analysis.outputs.execution_file }}" | jq -r '
+                reverse | .[] | 
+                select(.type == "assistant") | 
+                .message.content[]? | 
+                select(.type == "text") | 
+                .text
+              ' 2>/dev/null | head -1 || echo "Claude analysis could not be extracted")
+            fi
+            
+            # Save to output
+            echo "CLAUDE_RESPONSE<<EOF" >> $GITHUB_OUTPUT
+            echo "$CLAUDE_RESPONSE" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            # Debug: Show first 500 chars of response
+            echo "Claude response preview: ${CLAUDE_RESPONSE:0:500}..."
+          else
+            echo "No execution file found"
+            echo "CLAUDE_RESPONSE=No Claude analysis available" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Send email via AWS SES
+        env:
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_AUTHOR: ${{ github.actor }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+          CLAUDE_RESPONSE: ${{ steps.extract-response.outputs.CLAUDE_RESPONSE }}
+          SES_FROM_EMAIL: ${{ secrets.SES_FROM_EMAIL }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          # Create email body with Claude's analysis
+          cat > email-body.json << EOF
+          {
+            "Subject": {
+              "Data": "Claude Code Review: ${REPOSITORY} - ${COMMIT_MESSAGE}",
+              "Charset": "UTF-8"
+            },
+            "Body": {
+              "Html": {
+                "Data": "<html><body><h2>Automated Code Review Summary</h2><p><strong>Repository:</strong> ${REPOSITORY}<br/><strong>Branch:</strong> ${BRANCH}<br/><strong>Commit:</strong> ${COMMIT_SHA}<br/><strong>Author:</strong> ${COMMIT_AUTHOR}<br/><strong>Commit Message:</strong> ${COMMIT_MESSAGE}</p><h3>Changed Files:</h3><p>${CHANGED_FILES}</p><h3>Claude's Analysis:</h3><div style=\"white-space: pre-wrap; font-family: monospace; background-color: #f5f5f5; padding: 15px; border-radius: 5px;\">${CLAUDE_RESPONSE}</div><hr/><p style=\"color: #666; font-size: 12px;\">This automated review was generated by Claude AI to help maintain code quality and provide insights.</p></body></html>",
+                "Charset": "UTF-8"
+              },
+              "Text": {
+                "Data": "Automated Code Review Summary\n\nRepository: ${REPOSITORY}\nBranch: ${BRANCH}\nCommit: ${COMMIT_SHA}\nAuthor: ${COMMIT_AUTHOR}\nCommit Message: ${COMMIT_MESSAGE}\n\nChanged Files:\n${CHANGED_FILES}\n\nClaude's Analysis:\n${CLAUDE_RESPONSE}\n\n---\nThis automated review was generated by Claude AI to help maintain code quality and provide insights.",
+                "Charset": "UTF-8"
+              }
+            }
+          }
+          EOF
+          
+          # Send email using AWS SES
+          aws ses send-email \
+            --from "${SES_FROM_EMAIL}" \
+            --to "jaime.raldua.veuthey@gmail.com" \
+            --message file://email-body.json \
+            --region "${AWS_REGION}"
+          
+          echo "Email sent successfully to jaime.raldua.veuthey@gmail.com" 
