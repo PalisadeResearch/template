@@ -1,0 +1,58 @@
+- README: Add CODEOWNERS setup
+- README: Properly grant global-team access
+- flake.lock: Update
+- Backports: cursor rule to load direnv, format Typst, let Typst ignore system fonts (#25)
+- Add Claude PR Assistant workflow (#24)
+- Hackingdemo backports (#22)
+- flake: Add git
+- ci: Move pre-commit to GH Actions from pre-commit.ci
+- pre-commit: Migrate to Nix-supplied hook binaries
+- pre-commit: Add nixfmt
+- cursor/mcp: Add Linear
+- [pre-commit.ci] pre-commit autoupdate
+- flake.lock: Update
+- Update .gitignore to include .env file
+- [pre-commit.ci] pre-commit autoupdate
+- cursor/mcp: Add Semgrep
+- [pre-commit.ci] pre-commit autoupdate
+- Add CODEOWNERS
+- Revert "Add preferred build-system (hatchling) to pyproject.toml."
+- Add preferred build-system (hatchling) to pyproject.toml.
+- Revert "Flip git-lfs on SVG/PDF in paper-typst"
+- README: add Forking
+- README: run pre-commit on all files
+- [pre-commit.ci] pre-commit autoupdate
+- Deambiguate release tag
+- Flip git-lfs on SVG/PDF in paper-typst
+- README: Check the shell to set up direnv for
+- ci: Setup toolchain
+- [pre-commit.ci] pre-commit autoupdate
+- flake.lock: Update
+- vscode: Add semgrep extension
+- [pre-commit.ci] pre-commit autoupdate
+- Add Semgrep CI
+- [pre-commit.ci] pre-commit autoupdate
+- flake: Add Nix dev tools
+- flake.lock: Update
+- [pre-commit.ci] pre-commit autoupdate
+- ci: Let update-flake-lock push to git
+- ci: Add permissions
+- [pre-commit.ci] pre-commit autoupdate
+- Add Typst paper
+- vscode: Add Ninja syntax highlighting ext
+- Make matplotlib SVGs reproducible
+- README: nix-direnv
+- ci: Check if figures are up to date
+- fixup! Render paper and create release
+- ci: Fix CodeQL alerts
+- README: Add Files to know
+- ci: Cancel in-progress CI runs on fresh triggers
+- Expand README
+- ci: Update flake lock monthly
+- vscode: Ruff format and fix
+- [pre-commit.ci] pre-commit autoupdate
+- Render paper and create release
+- CI: drop lint action because we have pre-commit.ci now
+- Update with CTFish style
+- Import flake
+- Initial import
