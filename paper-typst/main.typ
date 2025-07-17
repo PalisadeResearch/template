@@ -2,7 +2,7 @@
   #text(17pt, [A Typst Demo Document])
 
   #grid(columns: (1fr,) * 1, row-gutter: 24pt)[
-    Your name #footnote[Correspondence to #link("mailto:example@palisaderesearch.org")]
+    Your name #footnote[Correspondence to #link("mailto:contact@palisaderesearch.org")]
   ]
 
   #datetime.today().display()
