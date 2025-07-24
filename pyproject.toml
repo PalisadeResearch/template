@@ -9,10 +9,31 @@ dependencies = [
     "numpy>=2.2.2",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.8.0",
+    "types-setuptools",  # Common type stubs
+]
+
 [tool.pyright]
 # disable pyright in favor of ruff
 typeCheckingMode = "off"
 ignore = ["*"]
+
+[tool.mypy]
+python_version = "3.13"
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
 
 [tool.ruff.lint]
 select = [

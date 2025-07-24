@@ -3,6 +3,7 @@
         "myriad-dreamin.tinymist",
         "ms-python.black-formatter",
         "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
         "mkhl.direnv",
         "editorconfig.editorconfig",
         "timonwong.shellcheck",

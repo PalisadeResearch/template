@@ -15,5 +15,23 @@
         "notebook.source.organizeImports": "explicit"
     },
     "tinymist.formatterMode": "typstyle",
-    "tinymist.systemFonts": false
+    "tinymist.systemFonts": false,
+    "cursorpyright.analysis.autoImportCompletions": true,
+    "cursorpyright.analysis.typeCheckingMode": "basic",
+    // MyPy integration
+    "mypy-type-checker.args": [
+        "--config-file=pyproject.toml"
+    ],
+    "mypy-type-checker.interpreter": [
+        "uv",
+        "run",
+        "python"
+    ],
+    "mypy-type-checker.importStrategy": "useBundled",
+    "mypy-type-checker.showNotifications": "onError",
+    // Enhanced type checking experience
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true
 }

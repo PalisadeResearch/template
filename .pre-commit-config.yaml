@@ -27,7 +27,15 @@ repos:
         language: system
         types_or: [python, pyi, jupyter]
         require_serial: true
+      - id: mypy
+        name: mypy
+        description: "Run 'mypy' for Python type checking"
+        entry: bash -c 'uv sync --extra dev --quiet && uv run mypy .'
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
 
 # pre-commit.ci SaaS does not have our Nix environment so we skip Nix-packaged hooks
 ci:
-  skip: [nixfmt, uv-lock, ruff, ruff-format]
+  skip: [nixfmt, uv-lock, ruff, ruff-format, mypy]

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def create_figure(path: str):
+def create_figure(path: str) -> None:
     # Create sample data
     x = np.linspace(0, 10, 100)
     y = np.sin(x)
@@ -22,7 +22,7 @@ def create_figure(path: str):
     plt.savefig(path)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python3 hello.py <output-path>")
         sys.exit(1)

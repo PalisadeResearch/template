@@ -5,6 +5,7 @@ A template repository implementing Palisade's coding guide. Features:
 - Nix + uv + direnv environment for development and CI
 - Figures and the paper build in CI
 - Lint and format pre-commit hooks
+- Python type checking with mypy
 - VSCode settings and extensions
 
 ## Development
@@ -76,8 +77,11 @@ Use Cursor to edit code. It will suggest extensions to install when you open the
 ```bash
 cd template # automatically loads environment
 ninja # builds figures and the paper
-git commit # checks format and lints
+uv run mypy . # run type checking locally
+git commit # checks format, lints, and type checks
 ```
+
+Type checking runs automatically in CI on pull requests and pushes to main, as well as in pre-commit hooks.
 
 ### Files to know
 
