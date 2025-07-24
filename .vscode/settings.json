@@ -27,7 +27,7 @@
         "run",
         "python"
     ],
-    "mypy-type-checker.importStrategy": "useBundled",
+    "mypy-type-checker.importStrategy": "fromEnvironment",
     "mypy-type-checker.showNotifications": "onError",
     // Enhanced type checking experience
     "python.analysis.completeFunctionParens": true,
