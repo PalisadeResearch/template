@@ -24,7 +24,7 @@
             # Python
             uv
             ruff
-            python313Packages.mypy
+            mypy
             # Typesetting
             typst
             texlive.combined.scheme-medium

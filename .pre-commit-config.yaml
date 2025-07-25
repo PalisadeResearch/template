@@ -30,7 +30,7 @@ repos:
       - id: mypy
         name: mypy
         description: "Run 'mypy' for Python type checking"
-        entry: mypy .
+        entry: mypy . --python-executable ./.venv/bin/python
         language: system
         types: [python]
         require_serial: true
