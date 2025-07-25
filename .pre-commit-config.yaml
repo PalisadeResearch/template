@@ -30,7 +30,7 @@ repos:
       - id: mypy
         name: mypy
         description: "Run 'mypy' for Python type checking"
-        entry: bash -c 'uv sync --extra dev --quiet && uv run mypy .'
+        entry: mypy .
         language: system
         types: [python]
         require_serial: true

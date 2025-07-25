@@ -9,12 +9,6 @@ dependencies = [
     "numpy>=2.2.2",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "mypy>=1.8.0",
-    "types-setuptools",  # Common type stubs
-]
-
 [tool.pyright]
 # disable pyright in favor of ruff
 typeCheckingMode = "off"
