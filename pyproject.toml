@@ -15,7 +15,6 @@ typeCheckingMode = "off"
 ignore = ["*"]
 
 [tool.mypy]
-python_version = "3.13"
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 disallow_untyped_defs = true
