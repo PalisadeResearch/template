@@ -23,8 +23,6 @@
             ninja
             # Python
             uv
-            ruff
-            mypy
             # Typesetting
             typst
             texlive.combined.scheme-medium
