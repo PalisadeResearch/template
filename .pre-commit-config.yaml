@@ -27,10 +27,10 @@ repos:
         language: system
         types_or: [python, pyi, jupyter]
         require_serial: true
-      - id: mypy
-        name: mypy
-        description: "Run 'mypy' for Python type checking"
-        entry: mypy .
+      - id: ty
+        name: ty
+        description: "Run 'ty' for Python type checking"
+        entry: ty check
         language: system
         types: [python]
         require_serial: true
@@ -38,4 +38,4 @@ repos:
 
 # pre-commit.ci SaaS does not have our Nix environment so we skip Nix-packaged hooks
 ci:
-  skip: [nixfmt, uv-lock, ruff, ruff-format, mypy]
+  skip: [nixfmt, uv-lock, ruff, ruff-format, ty]

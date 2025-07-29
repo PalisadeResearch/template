@@ -1,13 +1,12 @@
 {
     "recommendations": [
         "myriad-dreamin.tinymist",
-        "ms-python.black-formatter",
         "charliermarsh.ruff",
-        "ms-python.mypy-type-checker",
         "mkhl.direnv",
         "editorconfig.editorconfig",
         "timonwong.shellcheck",
         "melak47.ninja-syntax",
-        "semgrep.semgrep"
+        "semgrep.semgrep",
+        "astral-sh.ty"
     ]
 }

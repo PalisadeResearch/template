@@ -1,14 +1,6 @@
 {
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.autoImportCompletions": true,
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.fixAll": "explicit",
-            "source.organizeImports": "explicit"
-        },
-        "editor.defaultFormatter": "charliermarsh.ruff"
-    },
+    // disable python language server
+    "python.languageServer": "None",
     "notebook.formatOnSave.enabled": true,
     "notebook.codeActionsOnSave": {
         "notebook.source.fixAll": "explicit",
@@ -18,20 +10,9 @@
     "tinymist.systemFonts": false,
     "cursorpyright.analysis.autoImportCompletions": true,
     "cursorpyright.analysis.typeCheckingMode": "basic",
-    // MyPy integration
-    "mypy-type-checker.args": [
-        "--config-file=pyproject.toml"
-    ],
-    "mypy-type-checker.interpreter": [
-        "uv",
-        "run",
-        "python"
-    ],
-    "mypy-type-checker.importStrategy": "fromEnvironment",
-    "mypy-type-checker.showNotifications": "onError",
-    // Enhanced type checking experience
-    "python.analysis.completeFunctionParens": true,
-    "python.analysis.inlayHints.functionReturnTypes": true,
-    "python.analysis.inlayHints.variableTypes": true,
-    "python.analysis.inlayHints.pytestParameters": true
+    // Format Python files on save using ruff
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
 }
