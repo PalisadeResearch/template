@@ -5,7 +5,7 @@ A template repository implementing Palisade's coding guide. Features:
 - Nix + uv + direnv environment for development and CI
 - Figures and the paper build in CI
 - Lint and format pre-commit hooks
-- Python type checking with mypy
+- Python type checking with ty
 - VSCode settings and extensions
 
 ## Development
