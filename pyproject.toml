@@ -8,6 +8,11 @@ dependencies = [
     "matplotlib>=3.10.0",
     "numpy>=2.2.2",
 ]
+[dependency-groups]
+dev = [
+    "ty>=0.0.1a18",
+    "ruff>=0.12.5",
+]
 
 [tool.pyright]
 # disable pyright in favor of ruff
