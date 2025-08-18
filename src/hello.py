@@ -14,7 +14,7 @@ def create_figure(path: str):
     plt.plot(x, y, "b-", label="sin(x)")
     plt.title("Example Sine Wave")
     plt.xlabel("x")
-    plt.ylabel("sin(x)")
+    plt.ylabel("sin(x/2)")
     plt.grid(True)
     plt.legend()
 
