@@ -1,10 +1,10 @@
 name: Paper
 
 on:
-    push:
-      branches:
-        - main
-    pull_request:
+  push:
+    branches:
+      - main
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -73,6 +73,9 @@ jobs:
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Figures are out of date. Please rebuild figures and commit the changes."
+            echo "1️⃣ Git status shows:"
+            git status --porcelain
+            echo "2️⃣ Git diff shows:"
             git diff --name-only
             exit 1
           fi
