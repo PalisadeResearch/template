@@ -43,10 +43,14 @@ exit # the commands below need a fresh shell
 nix profile install nixpkgs#direnv nixpkgs#nix-direnv
 
 # Install direnv shell hook
-if ps -p $$ | grep -q zsh; then
+if [[ "$SHELL" == *"/zsh" ]]; then
     echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-elif ps -p $$ | grep -q bash; then
+elif [[ "$SHELL" == *"/bash" ]]; then
     echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+elif [[ "$SHELL" == *"/fish" ]]; then
+    echo 'eval "$(direnv hook fish)"' >> ~/.config/fish/config.fish
+else
+    echo "Can't set up direnv hook for your $SHELL, please set it up manually"
 fi
 
 # Setup nix-direnv
