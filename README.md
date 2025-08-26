@@ -1,17 +1,17 @@
 # template
 
-A template repository implementing Palisade's coding guide. Features:
+A template repository implementing Palisade's [coding guide](https://www.notion.so/palisade-research/Tools-we-use-9d58e310729f49ebaeaa496d08cacf37).
 
-- Nix + uv + direnv environment for development and CI
-- Figures and the paper build in CI
-- Lint and format pre-commit hooks
-- Python type checking with ty
-- VSCode settings and extensions
+- Write code in Cursor
+- Always log work-in-progress experiments to Logfire and Langfuse
+- Use trunk-driven development and continuous deployment
+- Commit often, rewrite history
 
 ## Development
 
-### Forking
-
+<details> 
+  <summary>Starting from the template repo</summary>
+  
 ```bash
 # Clone
 gh repo clone PalisadeResearch/template my-new-project -- -o template
@@ -19,18 +19,22 @@ cd my-new-project
 git lfs fetch --all
 
 # Set up
+
 git rm CODEOWNERS # remove or replace with your own
 
 # Push
+
 gh repo create --private PalisadeResearch/my-new-project
 gh api -X PUT /orgs/PalisadeResearch/teams/global-team/repos/PalisadeResearch/my-new-project -f permission=push
 git remote add origin git@github.com:PalisadeResearch/my-new-project.git
 git push -u origin main
-```
 
-### System setup
+````
 
-To set up your system for the first time, run:
+</details>
+
+<details>
+  <summary>First time setup</summary>
 
 ```bash
 # Setup Nix
@@ -59,9 +63,11 @@ echo 'source $HOME/.nix-profile/share/nix-direnv/direnvrc' >> ~/.config/direnv/d
 
 # Install pre-commit
 nix profile install nixpkgs#pre-commit
-```
+````
 
 If something goes wrong, cross-check your setup against this [GitHub Action](.github/workflows/setup-toolchain.yml).
+
+</details>
 
 ### Project setup
 
