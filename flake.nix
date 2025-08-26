@@ -26,12 +26,16 @@
             # Typesetting
             typst
             texlive.combined.scheme-medium
+            noto-fonts-color-emoji
             # Nix
             nil
             nixfmt-rfc-style
             # JavaScript
             nodejs # remote-mcp
           ];
+          shellHook = ''
+            export TYPST_FONT_PATHS="${pkgs.noto-fonts-color-emoji}"
+          '';
         };
       }
     );

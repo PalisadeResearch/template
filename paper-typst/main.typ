@@ -10,7 +10,7 @@
 
 #set heading(numbering: "1.")
 
-= Introduction
+= Introduction #emoji.book
 
 This is a demonstration document created with Typst that includes a figure.
 
