@@ -3,17 +3,19 @@ from __future__ import annotations
 import argparse
 import asyncio
 from contextlib import nullcontext
+import os
 from pathlib import Path
 from shutil import copytree
 
-import logfire
 from ipdb import launch_ipdb_on_exception
+import logfire
 from pydantic_graph import End, Graph
 from pydantic_graph.persistence.file import FileStatePersistence
 
+from . import nodes
+from ..utils import git
 from .env import Env
 from .state import State
-from . import nodes
 
 
 def main():
@@ -36,16 +38,21 @@ def main():
     logfire.instrument_openai()
     # TODO: instrument other stuff like model providers
 
-    root_attrs = {
-        "author": "me",
+    branch_name = git.current_branch() or "unknown"
+    commit_hash = git.current_commit() or "unknown"
+    run_name = f"run-{branch_name}-{commit_hash}"
+    run_attrs = {
         # TODO: add run metadata here
     }
+    if url := git.github_commit_link(commit_hash):
+        run_attrs["github_commit_link"] = url
+
     # This sets a "resource scope" for the run
     # Things created here would be closed/finalized/cleaned on exit.
     # For example you can't add log entries to that span after leaving this block.
     # But a context manager can be asked to restore the environment to match what the agent previously had.
     with (
-        logfire.span("example_hello-world", _span_name="main", **root_attrs) as root,
+        logfire.span(run_name, _span_name="main", **run_attrs) as root,
         (launch_ipdb_on_exception if args.debug else nullcontext)(),
         # TODO: add more resource-managing contexts here
     ):
