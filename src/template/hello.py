@@ -1,13 +1,13 @@
-import sys
+import argparse
 
 import matplotlib.pyplot as plt
-import numpy as np
+
+from .stuff import gen_data
 
 
 def create_figure(path: str):
     # Create sample data
-    x = np.linspace(0, 10, 100)
-    y = np.sin(x)
+    x, y = gen_data()
 
     # Create the figure
     plt.figure(figsize=(8, 6))
@@ -23,11 +23,11 @@ def create_figure(path: str):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python3 hello.py <output-path>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output")
+    args = parser.parse_args()
 
-    create_figure(sys.argv[1])
+    create_figure(args.output)
 
 
 if __name__ == "__main__":
