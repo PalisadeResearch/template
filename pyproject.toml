@@ -5,8 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "ipdb>=0.13.13",
+    "langfuse>=3.3.4",
     "matplotlib>=3.10.0",
     "numpy>=2.2.2",
+    "pydantic-ai>=1.0.2",
+    "python-ulid[pydantic,pydatnic]>=3.1.0",
 ]
 [dependency-groups]
 dev = [
@@ -23,6 +27,7 @@ sources = ["src"]
 
 [project.scripts]
 hello = "template.hello:main"
+agent = "template.agent.main:main"
 
 [tool.pyright]
 # disable pyright in favor of ruff
