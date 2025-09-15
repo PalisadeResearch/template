@@ -1,8 +1,8 @@
 rule uv_sync
   command = uv sync --all-extras --all-packages --dev
 
-rule figure
-  command = python3 $in $out
+rule hello
+  command = uv run hello $out
 
 rule latexmk
   command = latexmk -pdf -interaction=nonstopmode -silent -output-directory=paper-latex $in
@@ -13,9 +13,10 @@ rule typst_compile
 
 build .venv: uv_sync
 
-build paper-latex/hello.pdf: figure src/hello.py | .venv
-
-build paper-typst/hello.svg: figure src/hello.py | .venv
+# TODO: replace the /template/ with the actual project name
+# XXX: Update when python or data dependencies change
+build paper-latex/hello.pdf: hello | .venv pyproject.toml src/template/hello.py src/template/stuff.py
+build paper-typst/hello.svg: hello | .venv pyproject.toml src/template/hello.py src/template/stuff.py
 
 build figures: phony paper-latex/hello.pdf paper-typst/hello.svg
 
