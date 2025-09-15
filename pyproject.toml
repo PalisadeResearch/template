@@ -10,7 +10,7 @@ dependencies = [
     "matplotlib>=3.10.0",
     "numpy>=2.2.2",
     "pydantic-ai>=1.0.2",
-    "python-ulid[pydantic,pydatnic]>=3.1.0",
+    "python-ulid[pydantic]>=3.1.0",
 ]
 [dependency-groups]
 dev = [

@@ -21,6 +21,7 @@ def safe_load(
     if not isinstance(base, dict):
         raise TypeError("Base values should be dict (for in-place updates)")
     visited = visited or set()
+    include_paths = include_paths or list()
 
     if preset_file in visited:
         raise ValueError(f"Circular include detected: {preset_file}")

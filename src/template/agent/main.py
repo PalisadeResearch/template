@@ -68,7 +68,7 @@ def main():
         if args.restore:
             with logfire.span(f"Restoring from {args.restore}"):
                 old_path = Path(args.restore)
-                if not old_path.exists:
+                if not old_path.exists():
                     raise Exception(f"Restore path does not exist: {args.restore}")
                 if not old_path.is_dir():
                     raise Exception(f"Restore path is not a directory: {args.restore}")
