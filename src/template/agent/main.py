@@ -3,17 +3,17 @@ from __future__ import annotations
 import argparse
 import asyncio
 from contextlib import nullcontext
-import os
 from pathlib import Path
 from shutil import copytree
 
-from ipdb import launch_ipdb_on_exception
 import logfire
+from ipdb import launch_ipdb_on_exception
 from pydantic_graph import End, Graph
 from pydantic_graph.persistence.file import FileStatePersistence
 
-from . import nodes
 from ..utils import git
+from . import nodes
+from .config import Settings
 from .env import Env
 from .state import State
 
@@ -26,10 +26,11 @@ def main():
     parser.add_argument("--no-logfire", action="store_true")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--restore", metavar="DIR", help="Run path to resume/fork.")
-    parser.add_argument("readme")
+    parser.add_argument("--config")
 
     # TODO: add more fancy args
     args = parser.parse_args()
+    settings = Settings(config_name=args.config)
 
     logfire.configure(
         send_to_logfire=not args.no_logfire,
@@ -78,8 +79,8 @@ def main():
 
         # TODO: Start the requested services and put their handles here
         deps = Env(
+            settings=settings,
             run_path=run_path,
-            readme=args.readme,
         )
         asyncio.run(agent(deps))
 
