@@ -23,10 +23,8 @@ def current_branch() -> str:
 
 
 def ensure_experiment_branch() -> str:
-    """Abort execution if current branch does not start with ``experiment``.
-
-    Returns the branch name when the pre‑condition passes. Otherwise, prints an
-    instructional message and terminates the script with exit code ``1``.
+    """
+    Abort execution if current branch does not start with ``experiment``.
     """
 
     branch = current_branch()

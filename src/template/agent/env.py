@@ -15,3 +15,4 @@ class Env:
     settings: Settings
     run_path: Path
     # TODO: add handles and capabilities here
+    readme: str = "example"

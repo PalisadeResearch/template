@@ -7,14 +7,6 @@ from pydantic_settings import BaseSettings
 
 from ..utils import yayamlml
 
-"""Configuration settings for the autonomous agent stack.
-
-The file introduces a hierarchical configuration schema – each subsystem (agent,
-controller, observer, etc.) gets its own Pydantic model.  A top-level
-:class:`Settings` aggregates these models and can be populated from environment
-variables and/or YAML preset files.
-"""
-
 ROOT_DIR = Path(__file__).parent.parent.parent.parent
 
 CONFIG_DIR = ROOT_DIR / "config"

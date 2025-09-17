@@ -28,7 +28,7 @@ def main():
     parser.add_argument("--restore", metavar="DIR", help="Run path to resume/fork.")
     parser.add_argument("--config")
 
-    # TODO: add more fancy args
+    # TODO: add more args for controlling the script itself
     args = parser.parse_args()
     settings = Settings(config_name=args.config)
 
@@ -37,12 +37,14 @@ def main():
         scrubbing=False,
     )
     logfire.instrument_openai()
-    # TODO: instrument other stuff like model providers
+    # TODO: instrument other model providers and APIs
+    # https://ai.pydantic.dev/#instrumentation-with-pydantic-logfire
 
     branch_name = git.current_branch() or "unknown"
     commit_hash = git.current_commit() or "unknown"
     run_name = f"run-{branch_name}-{commit_hash}"
     run_attrs = {
+        "args": args,
         # TODO: add run metadata here
     }
     if url := git.github_commit_link(commit_hash):
@@ -57,7 +59,8 @@ def main():
         (launch_ipdb_on_exception if args.debug else nullcontext)(),
         # TODO: add more resource-managing contexts here
     ):
-        # Your unique identifier for this run (make a fresh one for forks)
+        # Your unique identifier for this run (the series of steps tracked as one closed block).
+        # NB: Restored/forked runs will get a fresh one too.
         run_id = f"{root.context.trace_id:032x}"
 
         # New runs appear on the bottom, automatically "sorted" by timestamp
@@ -131,6 +134,9 @@ async def agent(deps: Env):
         persistence=persistence,
     )
 
+    # Hard limit for steps in this run (i.e. without considering snapshot history from the restored runs)
+    steps_remaining = deps.settings.agent.MAX_STEPS
+
     # Run the graph to completion
     while True:
         async with graph.iter_from_persistence(persistence, deps=deps) as running:
@@ -138,8 +144,11 @@ async def agent(deps: Env):
             # TODO: add top-level processing related to the running instance
             logfire.debug(f"Running state: {running.state}")
 
-            # TODO: check the extra termination conditions
             if isinstance(next, End):
+                break
+            # TODO: check the extra termination conditions
+            steps_remaining -= 1
+            if not steps_remaining:
                 break
 
         pass  # State snapshot is taken here and recorded in the file
