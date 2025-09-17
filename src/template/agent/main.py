@@ -5,6 +5,7 @@ import asyncio
 from contextlib import nullcontext
 from pathlib import Path
 from shutil import copytree
+from glob import glob
 
 import logfire
 from ipdb import launch_ipdb_on_exception
@@ -23,14 +24,35 @@ def main():
     Squeeze the external world and distill into the Env fields.
     """
     parser = argparse.ArgumentParser(description="Run me")
-    parser.add_argument("--no-logfire", action="store_true")
-    parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--restore", metavar="DIR", help="Run path to resume/fork.")
-    parser.add_argument("--config")
+    parser.add_argument(
+        "--no-git",
+        action="store_true",
+        help="Do not track git state, check branch names and commit/push.",
+    )
+    parser.add_argument(
+        "--no-logfire", action="store_true", help="Run with only local logging."
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Drop to a debugger on unhandled exceptions.",
+    )
+    parser.add_argument(
+        "--restore",
+        metavar="DIR",
+        help="A path of a previous run to resume/fork. A new run id will be generated.",
+    )
+    configs = []
+    for path in Path("config").glob("*.yaml"):
+        configs.append(path.name.split(".yaml")[0])
+    parser.add_argument("config", choices=configs, help="Config name to use.")
 
     # TODO: add more args for controlling the script itself
     args = parser.parse_args()
     settings = Settings(config_name=args.config)
+
+    if not args.no_git:
+        git.ensure_experiment_branch()
 
     logfire.configure(
         send_to_logfire=not args.no_logfire,
