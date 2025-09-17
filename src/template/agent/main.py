@@ -3,9 +3,9 @@ from __future__ import annotations
 import argparse
 import asyncio
 from contextlib import nullcontext
+from datetime import datetime
 from pathlib import Path
 from shutil import copytree
-from glob import glob
 
 import logfire
 from ipdb import launch_ipdb_on_exception
@@ -84,6 +84,12 @@ def main():
         # Your unique identifier for this run (the series of steps tracked as one closed block).
         # NB: Restored/forked runs will get a fresh one too.
         run_id = f"{root.context.trace_id:032x}"
+
+        if not args.no_git_ops:
+            with logfire.span("Preparing git commit", _level="debug"):
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                commit_msg = f"run-{timestamp}-{run_id}"
+                git.commit_and_push(commit_msg)
 
         # New runs appear on the bottom, automatically "sorted" by timestamp
         run_path = Path("runs") / Path(run_id)
