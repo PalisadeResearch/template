@@ -33,11 +33,11 @@ from ._fork_worktree_parser import build_parser
 REPO_ROOT = Path.cwd()
 
 
-def sh(cmd: str) -> subprocess.CompletedProcess:
+def sh(args: list, **kwargs) -> subprocess.CompletedProcess:
     """Run a shell command, echoing it. Abort on error."""
-    print(f"$ {cmd}")
-    result = subprocess.run(cmd, shell=True, check=True)
-    return result
+    args_ = [str(a) for a in args]
+    print("$", " ".join(args_))
+    return subprocess.run(args_, check=True, **kwargs)
 
 
 def ensure_git_repo() -> None:
@@ -49,7 +49,7 @@ def ensure_git_repo() -> None:
 def git_current_branch() -> str:
     """Return the name of the currently checked‑out branch."""
     return (
-        subprocess.check_output("git rev-parse --abbrev-ref HEAD", shell=True)
+        subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
         .decode()
         .strip()
     )
@@ -58,7 +58,7 @@ def git_current_branch() -> str:
 def git_short_hash(branch: str) -> str:
     """Return the short hash of the given branch."""
     return (
-        subprocess.check_output(f"git rev-parse --short {branch}", shell=True)
+        subprocess.check_output(["git", "rev-parse", "--short", branch])
         .decode()
         .strip()
     )
@@ -117,13 +117,13 @@ def main(argv: list[str] | None = None) -> None:  # noqa: D401
         dir_name = f"worktree-{branch_name}"
         dest = base_dest / dir_name
 
-        sh(f"git branch {branch_name} {base_branch}")
+        sh(["git", "branch", branch_name, base_branch])
 
-        sh(f"git worktree add {dest} {branch_name}")
+        sh(["git", "worktree", "add", dest, branch_name])
 
         env_src = REPO_ROOT / ".env"
         if env_src.exists():
-            sh(f"cp {env_src} {dest}/.env")
+            sh(["cp", env_src, f"{dest}/.env"])
 
         venv_dest = dest / ".venv"
 
@@ -136,7 +136,7 @@ def main(argv: list[str] | None = None) -> None:  # noqa: D401
         else:
             print("Warning: Could not find Python to create .venv")
 
-        sh(f"direnv allow {dest}")
+        sh(["direnv", "allow", dest])
 
         if not args.no_open:
             subprocess.Popen(

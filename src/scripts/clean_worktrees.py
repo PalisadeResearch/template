@@ -18,7 +18,9 @@ from ._clean_worktrees_parser import build_parser
 
 try:
     REPO_ROOT_RAW = subprocess.check_output(
-        "git rev-parse --show-toplevel", shell=True, text=True, stderr=subprocess.PIPE
+        ["git", "rev-parse", "--show-toplevel"],
+        text=True,
+        stderr=subprocess.PIPE,
     ).strip()
     if not REPO_ROOT_RAW:
         raise ValueError("git rev-parse returned empty string")
@@ -30,18 +32,16 @@ except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as e:
     sys.exit(1)
 
 
-def sh(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
+def sh(args: list, **kwargs) -> subprocess.CompletedProcess:
     """Run a shell command, echoing it. Optionally abort on error."""
-    print(f"$ {cmd}")
-    result = subprocess.run(
-        cmd, shell=True, capture_output=True, text=True, check=check
-    )
-    return result
+    args_: list[str] = [str(a) for a in args]
+    print("$", " ".join(args_))
+    return subprocess.run(args_, capture_output=True, text=True, **kwargs)
 
 
 def get_worktree_paths() -> list[Path]:
     """Get a list of paths for managed worktrees, excluding the main one."""
-    result = sh("git worktree list --porcelain", check=False)
+    result = sh(["git", "worktree", "list", "--porcelain"], check=False)
     if result.returncode != 0:
         print(
             f"Warning: 'git worktree list' failed. Stderr: {result.stderr.strip()}",
@@ -132,9 +132,7 @@ def main() -> None:
                 f"Warning: Directory {path} does not exist. Removing worktree entry only."
             )
 
-        remove_cmd = f'git worktree remove --force "{path}"'
-        result = sh(remove_cmd, check=False)
-
+        result = sh(["git", "worktree", "remove", "--force", path], check=False)
         if result.returncode == 0:
             print(f"Successfully removed git worktree entry for {path}")
 
