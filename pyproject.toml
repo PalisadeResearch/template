@@ -16,6 +16,7 @@ dependencies = [
 dev = [
     "ty>=0.0.1a18",
     "ruff>=0.12.5",
+    "argcomplete>=3.6.2",
 ]
 
 [build-system]
@@ -26,6 +27,8 @@ build-backend = "hatchling.build"
 sources = ["src"]
 
 [project.scripts]
+fork-worktree = "scripts.fork_worktree:main"
+clean-worktrees = "scripts.clean_worktrees:main"
 hello = "template.hello:main"
 agent = "template.agent.main:main"
 
