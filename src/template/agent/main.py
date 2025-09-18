@@ -133,29 +133,10 @@ async def agent(deps: Env):
     persistence = FileStatePersistence(history_path)
     persistence.set_graph_types(graph)
     if snapshots := await persistence.load_all():
-        # TODO: add snapshot filtering like "drop N last steps"
-        node, state = None, None
-        logfire.debug(f"Loaded {len(snapshots)} snapshots from {history_path}")
-        for snapshot in reversed(snapshots):
-            if snapshot.kind == "end":
-                logfire.debug("Resuming an ended run")
-                continue
-            if snapshot.kind == "node":
-                node = snapshot.node
-                if isinstance(node, End):
-                    logfire.debug(f"Skipping End node {snapshot.id}")
-                    continue
-                logfire.debug(f"Restoring from snapshot {snapshot.id}")
-                state = snapshot.state
-                break
-        if node is None or state is None:
-            raise RuntimeError(
-                f"No viable snapshots in the persistence file {history_path}"
-            )
+        node, state = restore_snapshot(snapshots, history_path)
     else:
         node = start()
         state = State()
-
     await graph.initialize(
         node=node,
         state=state,
@@ -180,6 +161,30 @@ async def agent(deps: Env):
                 break
 
         pass  # State snapshot is taken here and recorded in the file
+
+
+def restore_snapshot(snapshots: list, history_path: Path):
+    # TODO: add snapshot filtering like "drop N last steps"
+    node = None
+    state: State | None = None
+    logfire.debug(f"Loaded {len(snapshots)} snapshots from {history_path}")
+    for snapshot in reversed(snapshots):
+        if snapshot.kind == "end":
+            logfire.debug("Resuming an ended run")
+            continue
+        if snapshot.kind == "node":
+            node = snapshot.node
+            if isinstance(node, End):
+                logfire.debug(f"Skipping End node {snapshot.id}")
+                continue
+            logfire.debug(f"Restoring from snapshot {snapshot.id}")
+            state = snapshot.state
+            break
+    if node is None or state is None:
+        raise RuntimeError(
+            f"No viable snapshots in the persistence file {history_path}"
+        )
+    return node, state
 
 
 if __name__ == "__main__":
