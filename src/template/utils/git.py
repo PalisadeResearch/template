@@ -75,7 +75,7 @@ def current_commit() -> str:
     """Return the short hash of the current git HEAD commit."""
     try:
         result = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "rev-parse", "HEAD"],
             text=True,
             stderr=subprocess.DEVNULL,
         )

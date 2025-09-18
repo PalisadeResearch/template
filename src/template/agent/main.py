@@ -64,10 +64,9 @@ def main():
 
     branch_name = git.current_branch() or "unknown"
     commit_hash = git.current_commit() or "unknown"
-    run_name = f"run-{branch_name}-{commit_hash}"
+    run_name = f"run-{branch_name}-{commit_hash[:8]}"
     run_attrs = {
-        "args": args,
-        # TODO: add run metadata here
+        # TODO: add LogFire run metadata here
     }
     if url := git.github_commit_link(commit_hash):
         run_attrs["github_commit_link"] = url
