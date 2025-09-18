@@ -85,7 +85,7 @@ def main():
         # NB: Restored/forked runs will get a fresh one too.
         run_id = f"{root.context.trace_id:032x}"
 
-        if not args.no_git_ops:
+        if not args.no_git:
             with logfire.span("Preparing git commit", _level="debug"):
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 commit_msg = f"run-{timestamp}-{run_id}"
