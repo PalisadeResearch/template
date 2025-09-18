@@ -5,13 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "ipdb>=0.13.13",
+    "langfuse>=3.3.4",
     "matplotlib>=3.10.0",
     "numpy>=2.2.2",
+    "pydantic-ai>=1.0.2",
+    "python-ulid[pydantic]>=3.1.0",
 ]
 [dependency-groups]
 dev = [
     "ty>=0.0.1a18",
     "ruff>=0.12.5",
+    "argcomplete>=3.6.2",
 ]
 
 [build-system]
@@ -22,7 +27,10 @@ build-backend = "hatchling.build"
 sources = ["src"]
 
 [project.scripts]
+fork-worktree = "scripts.fork_worktree:main"
+clean-worktrees = "scripts.clean_worktrees:main"
 hello = "template.hello:main"
+agent = "template.agent.main:main"
 
 [tool.pyright]
 # disable pyright in favor of ruff
