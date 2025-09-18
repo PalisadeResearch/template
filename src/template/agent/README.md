@@ -6,7 +6,7 @@
   - Process args
   - Load config
   - Prepare new run metadata
-  - (when requested) Restore environment from a previous run
+  - Create or restore environment
   - Pack handles to the Env
 - Run
   - (when requested) Restore state from a previous run

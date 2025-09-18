@@ -15,7 +15,7 @@ from pydantic_graph.persistence.file import FileStatePersistence
 from ..utils import git
 from . import nodes
 from .config import Settings
-from .env import Env
+from .env import Env, Metadata
 from .state import State
 
 
@@ -95,6 +95,7 @@ def main():
         run_path.mkdir(exist_ok=True, parents=True)
         logfire.notice(f"Run path: {run_path}")
 
+        old_meta: Metadata | None = None
         if args.restore:
             with logfire.span(f"Restoring from {args.restore}"):
                 old_path = Path(args.restore)
@@ -102,6 +103,9 @@ def main():
                     raise Exception(f"Restore path does not exist: {args.restore}")
                 if not old_path.is_dir():
                     raise Exception(f"Restore path is not a directory: {args.restore}")
+                old_meta_path = old_path / Path("metadata.json")
+                with old_meta_path.open() as f:
+                    old_meta = Metadata.model_validate_json(f.read())
                 # XXX: blindly copying the old run path (containing the history file)
                 # While this is enough to recover graph state, you may have to write some metadata file
                 # to record external resources used like docker image IDs, IPs
@@ -112,6 +116,22 @@ def main():
             settings=settings,
             run_path=run_path,
         )
+
+        if old_meta:
+            ancestor_ids: list[str] = old_meta.ancestor_ids + [old_meta.run_id]
+            # TODO: carry over more information from the previous run
+        else:
+            ancestor_ids = []
+        new_meta = Metadata(
+            commit_hash=commit_hash,
+            args=args.__dict__,
+            run_id=run_id,
+            ancestor_ids=ancestor_ids,
+        )
+        new_meta_path = run_path / Path("metadata.json")
+        with new_meta_path.open("w") as f:
+            f.write(new_meta.model_dump_json(indent=2))
+
         asyncio.run(agent(deps))
 
 
