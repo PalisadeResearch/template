@@ -1,5 +1,5 @@
 [project]
-name = "template"
+name = "tutorial"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -29,8 +29,8 @@ sources = ["src"]
 [project.scripts]
 fork-worktree = "scripts.fork_worktree:main"
 clean-worktrees = "scripts.clean_worktrees:main"
-hello = "template.hello:main"
-agent = "template.agent.main:main"
+hello = "tutorial.hello:main"
+agent = "tutorial.agent.main:main"
 
 [tool.pyright]
 # disable pyright in favor of ruff
