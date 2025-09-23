@@ -9,9 +9,9 @@ A template repository implementing Palisade's [coding guide](https://www.notion.
 
 ## Development
 
-<details> 
+<details>
   <summary>Starting from the template repo</summary>
-  
+
 ```bash
 # Clone
 gh repo clone PalisadeResearch/template my-new-project -- -o template
@@ -28,8 +28,7 @@ gh repo create --private PalisadeResearch/my-new-project
 gh api -X PUT /orgs/PalisadeResearch/teams/global-team/repos/PalisadeResearch/my-new-project -f permission=push
 git remote add origin git@github.com:PalisadeResearch/my-new-project.git
 git push -u origin main
-
-````
+```
 
 </details>
 
@@ -63,7 +62,7 @@ echo 'source $HOME/.nix-profile/share/nix-direnv/direnvrc' >> ~/.config/direnv/d
 
 # Install pre-commit
 nix profile install nixpkgs#pre-commit
-````
+```
 
 If something goes wrong, cross-check your setup against this [GitHub Action](.github/workflows/setup-toolchain.yml).
 
@@ -71,7 +70,9 @@ If something goes wrong, cross-check your setup against this [GitHub Action](.gi
 
 ### Project setup
 
-After cloning the repository, run:
+After cloning the repository, copy `.env.example` to `.env` and fill in the keys.
+
+Then run:
 
 ```bash
 # allow loading environment from flake.nix, pyproject.toml, and .env
