@@ -180,3 +180,43 @@ If you did the git setup from the [README](./README.md) / "Development" section,
 ```sh
 git push
 ```
+
+## 2. Adding an external service
+
+Before we can unleash an agent on an unsuspecting world we should prepare a home for it.
+
+We'll create a new service and plug it into the agent lifecycle using a context manager.
+
+Drop this code into a main.py somewhere at the top:
+
+```python
+import logfire
+
+from contextlib import contextmanager
+
+
+@contextmanager
+def env():
+    # TODO: todo setup
+    with logfire.span("tutorial.env", _level="debug"):
+        try:
+            logfire.info("Setting up")
+            yield "hey!"
+            logfire.info("Settup finished")
+        finally:
+            logfire.info("Cleaning up")
+            # TODO: cleanup
+```
+
+Then plug it into the `main` function:
+
+```python
+    with (
+        env() as _hey,  # HERE
+        logfire.span(run_name, _span_name="main", **run_attrs) as root,
+        (launch_ipdb_on_exception if args.debug else nullcontext)(),
+        # TODO: add more resource-managing contexts here
+    ):
+```
+
+Now, if you re-run agent using `agent --no-logfire --no-git smoke`, you'll see the new log entries.
