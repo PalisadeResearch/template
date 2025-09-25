@@ -187,36 +187,202 @@ Before we can unleash an agent on an unsuspecting world we should prepare a home
 
 We'll create a new service and plug it into the agent lifecycle using a context manager.
 
-Drop this code into a main.py somewhere at the top:
+To test the waters, drop this code into a main.py somewhere at the top:
 
 ```python
 import logfire
-
 from contextlib import contextmanager
-
 
 @contextmanager
 def env():
-    # TODO: todo setup
-    with logfire.span("tutorial.env", _level="debug"):
+    with logfire.span("The scope"):
+        logfire.info("TODO: Setup")
         try:
-            logfire.info("Setting up")
-            yield "hey!"
-            logfire.info("Settup finished")
+            yield "hey"  # The value that gets captured in the `with .. as ..` block.
         finally:
-            logfire.info("Cleaning up")
-            # TODO: cleanup
+            logfire.info("TODO: Cleanup")
 ```
 
 Then plug it into the `main` function:
 
 ```python
-    with (
-        env() as _hey,  # HERE
-        logfire.span(run_name, _span_name="main", **run_attrs) as root,
-        (launch_ipdb_on_exception if args.debug else nullcontext)(),
-        # TODO: add more resource-managing contexts here
-    ):
+        with (
+            nullcontext(),  # Placeholder
+            # TODO: Start the requested services
+            env() as hey,
+        ):
+            logfire.notice(f"Hey, {hey}")
+            # raise Exception("oh no")
 ```
 
-Now, if you re-run agent using `agent --no-logfire --no-git smoke`, you'll see the new log entries.
+Now, if you re-run agent using `agent --no-logfire --no-git smoke`, you'll see the new log entries (note the order and indentation):
+
+```
+16:48:04.727 run-tutorial-85be8b17
+16:48:04.803   Run path: runs/0199812190f7a3fa76b3a5227c9aafa2
+16:48:04.805   The scope
+16:48:04.805     TODO: Setup
+16:48:04.806     Hey, hey
+16:48:04.824     run graph graph
+16:48:04.825       run node Step
+16:48:04.828         1: example
+...
+16:48:04.859     run graph graph
+16:48:04.860       run node Step
+16:48:04.861         5: example
+16:48:04.865     TODO: Cleanup
+```
+
+Uncommenting `raise Exception` will short-circuit the run, but not the setup/cleanup:
+
+```
+17:07:41.830 run-tutorial-85be8b17
+17:07:41.909   Run path: runs/0199813387068da7fbac1daccfd374e9
+17:07:41.910   The scope
+17:07:41.910     TODO: Setup
+17:07:41.911     Hey, hey
+17:07:41.911     TODO: Cleanup
+Traceback (most recent call last):
+...
+```
+
+Since "The scope" is nested inside the `run-tutorial-...`, it has access to the directory of the run (`runs/01998...`).
+We can pass that path to the context manager and and log the result:
+
+```python
+        with (
+            env(run_path) as hey,
+        ):
+            logfire.notice(f"Hey, {hey}")
+            hey.write("Hey!\n")
+```
+
+Let's use the provided run_path to open (and close!) a file handle:
+
+```python
+import logfire
+from pathlib import Path
+
+from contextlib import contextmanager
+
+
+@contextmanager
+def env(run_path: Path):
+    with logfire.span("The scope"):
+        fp = run_path / Path("hey.txt")
+        logfire.info(f"Opening {fp}")
+        f = open(fp, "a")  # Will create file explicitly just for the demo...
+        try:
+            yield f  # This handle is valid only inside the with-block
+        finally:
+            logfire.info(f"Closing {fp}")
+            f.close()  # ... and close it too.
+```
+
+Running `agent smoke --no-logfire --no-git` you now should see the resulting file path and a handle to it in the logs:
+
+ ```
+12:24:09.116 run-tutorial-8500a265
+12:24:09.196   Run path: runs/019994c95f1cce9b35b0097433bd1255
+12:24:09.197   The scope
+12:24:09.197     Opening runs/019994c95f1cce9b35b0097433bd1255/hey.txt
+12:24:09.198     Hey, <_io.TextIOWrapper name='runs/019994c95f1cce9b35b0097433bd1255/hey.txt' mode='a' encoding='UTF-8'>
+12:24:09.213     run graph graph
+12:24:09.214       run node Step
+12:24:09.217         1: example
+...
+12:24:09.239     run graph graph
+12:24:09.239       run node Step
+12:24:09.241         5: example
+12:24:09.245     Closing runs/019994c95f1cce9b35b0097433bd1255/hey.txt
+```
+
+The file should contain the "Hey!" line resulting from the `hey.write()`.
+
+Now you can see the `--restore` argument in action.
+Run `agent smoke --no-logfire --no-git --restore runs/019994c95f1cce9b35b0097433bd1255` (with a run path of your own):
+
+```
+12:33:47.068 run-tutorial-8500a265
+12:33:47.116   Run path: runs/019994d230bc7c9a083dd1560c4dcdc6
+12:33:47.117   Restoring from runs/019994c95f1cce9b35b0097433bd1255
+12:33:47.119   The scope
+12:33:47.119     Opening runs/019994d230bc7c9a083dd1560c4dcdc6/hey.txt
+12:33:47.120     Hey, <_io.TextIOWrapper name='runs/019994d230bc7c9a083dd1560c4dcdc6/hey.txt' mode='a' encoding='UTF-8'>
+12:33:47.134     run graph graph
+12:33:47.135       run node Step
+12:33:47.137         5: example
+12:33:47.141     Closing runs/019994d230bc7c9a083dd1560c4dcdc6/hey.txt
+```
+
+A few things to notice:
+
+1. The run is short - it starts at "step 5" and immediately finishes.
+  That means the persisted graph state did carry over.
+2. The old run ID only shows up in the "Restoring from ..." line.
+  The previous run is "finalized" and you can't "log more entries into it".
+  The run that resulted from the restoration is effectively forked from its parent and has an isolated history.
+
+Divining into the files will reveal a few more details:
+
+1. Inspecting the new `hey.txt` file will now show two "Hey!" lines.
+2. Its [metadata](./runs/019994d230bc7c9a083dd1560c4dcdc6/metadata.json) file has the single entry in its `ancestors`field, pointing to the run it were restored from.
+
+Finally, let's register that handle in then `Env` class so it would be available in the run.
+
+Go to the [Env.py](./src/tutorial/agent/env.py) and add a new field:
+
+> The readme has a default value here, so we have to add our new field before it for Env constructors to work smoothly.
+
+```python
+    # TODO: add handles and capabilities here
+    hey: "io.TextIOWrapper"
+
+    readme: str = "example"
+```
+
+Then pass the actual handle to the Env in `main.py`:
+
+```python
+            deps = Env(
+                settings=settings,
+                run_path=run_path,
+                # TODO: Put service handles here
+                hey=hey,
+            )
+```
+
+Finally, let's pick the handle from the node context and use it:
+
+Edit the `Step.run()` in [nodes.py](src/tutorial/agent/nodes.py):
+
+```python
+        # Mutate the state (persisted in the history file)
+        ctx.state.changeme += 1
+
+        # Perform IO in the world using a handle
+        ctx.deps.hey.write(f"Hello from Step. changeme={ctx.state.changeme}\n")
+```
+
+Run `agent --no-logfire --no-git smoke` again and inspect its new `hey.txt` file.
+
+It will contain the data from the node:
+
+```
+Hey!
+Hello from Step. changeme=1
+Hello from Step. changeme=2
+Hello from Step. changeme=3
+Hello from Step. changeme=4
+Hello from Step. changeme=5
+```
+
+Re-run with `--restore` from the last path and you'll see an extra section in its file:
+
+```
+...
+Hello from Step. changeme=4
+Hello from Step. changeme=5
+Hey!
+Hello from Step. changeme=5
+```
