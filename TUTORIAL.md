@@ -187,36 +187,92 @@ Before we can unleash an agent on an unsuspecting world we should prepare a home
 
 We'll create a new service and plug it into the agent lifecycle using a context manager.
 
-Drop this code into a main.py somewhere at the top:
+To test the waters, drop this code into a main.py somewhere at the top:
 
 ```python
 import logfire
-
 from contextlib import contextmanager
-
 
 @contextmanager
 def env():
-    # TODO: todo setup
-    with logfire.span("tutorial.env", _level="debug"):
+    with logfire.span("The scope"):
+        logfire.info("TODO: Setup")
         try:
-            logfire.info("Setting up")
-            yield "hey!"
-            logfire.info("Settup finished")
+            yield "hey"
         finally:
-            logfire.info("Cleaning up")
-            # TODO: cleanup
+            logfire.info("TODO: Cleanup")
 ```
 
 Then plug it into the `main` function:
 
 ```python
-    with (
-        env() as _hey,  # HERE
-        logfire.span(run_name, _span_name="main", **run_attrs) as root,
-        (launch_ipdb_on_exception if args.debug else nullcontext)(),
-        # TODO: add more resource-managing contexts here
-    ):
+        with (
+            nullcontext(),  # Placeholder
+            # TODO: Start the requested services
+            env() as hey,
+        ):
+            logfire.notice(f"Hey, {hey}")
+            # raise Exception("oh no")
 ```
 
-Now, if you re-run agent using `agent --no-logfire --no-git smoke`, you'll see the new log entries.
+Now, if you re-run agent using `agent --no-logfire --no-git smoke`, you'll see the new log entries (note the order and indentation):
+
+```
+16:48:04.727 run-tutorial-85be8b17
+16:48:04.803   Run path: runs/0199812190f7a3fa76b3a5227c9aafa2
+16:48:04.805   The scope
+16:48:04.805     TODO: Setup
+16:48:04.806     Hey, hey
+16:48:04.824     run graph graph
+16:48:04.825       run node Step
+16:48:04.828         1: example
+...
+16:48:04.859     run graph graph
+16:48:04.860       run node Step
+16:48:04.861         5: example
+16:48:04.865     TODO: Cleanup
+```
+
+Uncommenting `raise Exception` will short-circuit the run, but not the setup/cleanup:
+
+```
+17:07:41.830 run-tutorial-85be8b17
+17:07:41.909   Run path: runs/0199813387068da7fbac1daccfd374e9
+17:07:41.910   The scope
+17:07:41.910     TODO: Setup
+17:07:41.911     Hey, hey
+17:07:41.911     TODO: Cleanup
+Traceback (most recent call last):
+...
+```
+
+Since "The scope" is nested inside the `run-tutorial-...`, it has access to the directory of the run (`runs/01998...`). We can pass that path to the context manager:
+
+```python
+        with (
+            env(run_path) as hey,
+        ):
+```
+
+Then do something with it:
+
+```python
+import logfire
+from pathlib import Path
+
+from contextlib import contextmanager
+
+
+@contextmanager
+def env(run_path: Path):
+    with logfire.span("The scope"):
+        fp = run_path / Path("hey.txt")
+        logfire.info(f"Opening {fp}")
+        f = open(fp, "a")  # Will create file explicitly just for the demo...
+        try:
+            yield f
+        finally:
+            logfire.info(f"Closing {fp}")
+            f.close()  # ... and close it too.
+```
+
