@@ -71,14 +71,9 @@ def main():
     if url := git.github_commit_link(commit_hash):
         run_attrs["github_commit_link"] = url
 
-    # This sets a "resource scope" for the run
-    # Things created here would be closed/finalized/cleaned on exit.
-    # For example you can't add log entries to that span after leaving this block.
-    # But a context manager can be asked to restore the environment to match what the agent previously had.
     with (
         logfire.span(run_name, _span_name="main", **run_attrs) as root,
         (launch_ipdb_on_exception if args.debug else nullcontext)(),
-        # TODO: add more resource-managing contexts here
     ):
         # Your unique identifier for this run (the series of steps tracked as one closed block).
         # NB: Restored/forked runs will get a fresh one too.
@@ -111,28 +106,36 @@ def main():
                 # to record external resources used like docker image IDs, IPs
                 copytree(src=old_path, dst=run_path, dirs_exist_ok=True)
 
-        # TODO: Start the requested services and put their handles here
-        deps = Env(
-            settings=settings,
-            run_path=run_path,
-        )
+        # This sets a "resource scope" for the run
+        # Things created here would be closed/finalized/cleaned on exit.
+        # A context manager can be asked to restore the environment to match what the agent previously had.
+        with (
+            nullcontext(),  # Placeholder
+            # TODO: Start the requested services
+        ):
+            deps = Env(
+                settings=settings,
+                run_path=run_path,
+                # TODO: Put service handles here
+            )
 
-        if old_meta:
-            ancestor_ids: list[str] = old_meta.ancestor_ids + [old_meta.run_id]
-            # TODO: carry over more information from the previous run
-        else:
-            ancestor_ids = []
-        new_meta = Metadata(
-            commit_hash=commit_hash,
-            args=args.__dict__,
-            run_id=run_id,
-            ancestor_ids=ancestor_ids,
-        )
-        new_meta_path = run_path / Path("metadata.json")
-        with new_meta_path.open("w") as f:
-            f.write(new_meta.model_dump_json(indent=2))
+            if old_meta:
+                ancestor_ids: list[str] = old_meta.ancestor_ids + [old_meta.run_id]
+                # TODO: Carry over more information from the previous run
+            else:
+                ancestor_ids = []
+            new_meta = Metadata(
+                commit_hash=commit_hash,
+                args=args.__dict__,
+                run_id=run_id,
+                ancestor_ids=ancestor_ids,
+                # TODO: Register more env-related metadata here
+            )
+            new_meta_path = run_path / Path("metadata.json")
+            with new_meta_path.open("w") as f:
+                f.write(new_meta.model_dump_json(indent=2))
 
-        asyncio.run(agent(deps))
+            asyncio.run(agent(deps))
 
 
 async def agent(deps: Env):
