@@ -38,12 +38,12 @@ The run directory contains a step-by-step state history and some metadata.
 You can inspect the `history.json` file to inspect what the system was doing.
 
 > Read the dump and look out for "comments":
-> ```json
+> ```js
 > // those are inline annotations
 > // the actual field wouldn't have those
 > ```
 
-```json
+```js
 [
   {
     "state": {  // the initial state
@@ -93,7 +93,7 @@ The important fields are:
 The last object is a bit different, containing `"result"` field instead of node since this is where the run finished (also note `"kind": "end"`).
 
 > You can filter it with `jq '.[] | {state, kind, status, next: .node.node_id}' runs/*/history.json` to get an overview:
-> ```json
+> ```js
 > {"state":{"changeme":0},"kind":"node","status":"success","next":"Step"}
 > {"state":{"changeme":1},"kind":"node","status":"success","next":"Step"}
 > {"state":{"changeme":2},"kind":"node","status":"success","next":"Step"}
