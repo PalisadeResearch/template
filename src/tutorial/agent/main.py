@@ -18,6 +18,22 @@ from .config import Settings
 from .env import Env, Metadata
 from .state import State
 
+from contextlib import contextmanager
+
+
+@contextmanager
+def env(fp: Path):
+    with logfire.span("The scope"):
+        if fp.is_dir():
+            fp = fp / Path("hey.txt")
+        logfire.info(f"Opening {fp}")
+        f = open(fp, "a")
+        try:
+            yield f
+        finally:
+            logfire.info(f"Closing {fp}")
+            f.close()
+
 
 def main():
     """
@@ -112,11 +128,17 @@ def main():
         with (
             nullcontext(),  # Placeholder
             # TODO: Start the requested services
+            env(
+                run_path / Path(old_meta.hey_name) if old_meta else run_path,
+            ) as hey,
         ):
+            logfire.notice(f"Hey, {hey}")
+            hey.write("Hey!\n")
             deps = Env(
                 settings=settings,
                 run_path=run_path,
                 # TODO: Put service handles here
+                hey=hey,
             )
 
             if old_meta:
@@ -130,6 +152,7 @@ def main():
                 run_id=run_id,
                 ancestor_ids=ancestor_ids,
                 # TODO: Register more env-related metadata here
+                hey_name=str(Path(hey.name).relative_to(run_path)),
             )
             new_meta_path = run_path / Path("metadata.json")
             with new_meta_path.open("w") as f:

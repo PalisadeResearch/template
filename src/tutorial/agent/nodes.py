@@ -19,6 +19,9 @@ class Step(BaseNode[State, Env, None]):  # Using State and Env...
         # Mutate the state (persisted in the history file)
         ctx.state.changeme += 1
 
+        # Perform IO in the world using a handle
+        ctx.deps.hey.write(f"Hello from Step. changeme={ctx.state.changeme}\n")
+
         # Render some text
         logfire.notice(f"{ctx.state.changeme}: {ctx.deps.readme}")
 

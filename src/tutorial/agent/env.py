@@ -18,6 +18,7 @@ class Env:
     settings: Settings
     run_path: Path
     # TODO: add handles and capabilities here
+    hey: "io.TextIOWrapper"
     readme: str = "example"
 
 
@@ -41,3 +42,4 @@ class Metadata(BaseModel):
     ancestor_ids: list[str] = Field(default_factory=list)
 
     # TODO: add more things to preseve and track across runs
+    hey_name: str
