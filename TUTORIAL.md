@@ -328,9 +328,9 @@ Divining into the files will reveal a few more details:
 1. Inspecting the new `hey.txt` file will now show two "Hey!" lines.
 2. Its [metadata](./runs/019994d230bc7c9a083dd1560c4dcdc6/metadata.json) file has the single entry in its `ancestors`field, pointing to the run it were restored from.
 
-Finally, let's register that handle in then `Env` class so it would be available in the run.
+Let's register that handle in then `Env` class so it would be available in the run.
 
-Go to the [Env.py](./src/tutorial/agent/env.py) and add a new field:
+Go to the [Env.py](./src/tutorial/agent/env.py) and add a new field to the `Env` class:
 
 > The readme has a default value here, so we have to add our new field before it for Env constructors to work smoothly.
 
@@ -386,3 +386,77 @@ Hello from Step. changeme=5
 Hey!
 Hello from Step. changeme=5
 ```
+
+Finally, let's tie that with the metadata tracking to simulate dynamic-but-persistent configuration.
+
+In a real configuration that can be map of network ranges or live container IDs.
+Here we will use the file once more to go through the checklist for the "initialize or restore" pattern.
+
+First, go to the [Env.py](./src/tutorial/agent/env.py) and add a new field to the `Metadata` class:
+
+```python
+    # TODO: add more things to preseve and track across runs
+    hey_name: str
+```
+
+Now, fill in the field when creating the metadata record:
+
+```python
+                # TODO: Register more env-related metadata here
+                hey_name=str(Path(hey.name).relative_to(run_path)),
+```
+
+> A relative path is used to prevent names pointing back at the original runs.
+> It is better to keep the forked runs standalone if you can.
+> Otherwise you'd have to resolve the conflicts and updates between the different runs.
+
+Adapt the context manager to only append the default file name if it given a directory:
+
+```python
+@contextmanager
+def env(fp: Path):
+    with logfire.span("The scope"):
+        if fp.is_dir():
+            fp = fp / Path("hey.txt")
+        # the rest is the same
+        logfire.info(f"Opening {fp}")
+        ...
+```
+
+Now we can pass a file path if we have one from the metadata of a previous run.
+Replace the run_path arg with a conditional too:
+
+```python
+        with (
+            nullcontext(),  # Placeholder
+            # TODO: Start the requested services
+            env(
+                run_path / Path(old_meta.hey_name) if old_meta else run_path,
+            ) as hey,
+        ):
+```
+
+To test the setup we'll to some workspace and metadata surgery:
+
+1. Do an initial run: `agent --no-logfire --no-git smoke | grep "Run path:"`
+2. Rename the `hey.txt` in its path to `hola.txt`
+3. Edit the `metadata.json` file and update `hey_name` path to `hola.txt`.
+
+Restore the modified run and see that the new non-default environment gets picked up correctly:
+
+```
+15:19:42.026 run-tutorial-84cecf9e
+15:19:42.055   Run path: runs/0199956a174abb8cb31891e142a92345
+15:19:42.056   Restoring from runs/019995699bfd64536061fc247176f4fd
+15:19:42.058   The scope
+15:19:42.058     Opening runs/0199956a174abb8cb31891e142a92345/hola.txt
+15:19:42.059     Hey, <_io.TextIOWrapper name='runs/0199956a174abb8cb31891e142a92345/hola.txt' mode='a' encoding='UTF-8'>
+15:19:42.074     run graph graph
+15:19:42.075       run node Step
+15:19:42.078         5: example
+15:19:42.083     Closing runs/0199956a174abb8cb31891e142a92345/hola.txt
+```
+
+In a realistic setup that would mean that e.g. your contnainers and network IPs got the values that match the agent's state.
+
+Now you're equipped with an ability to encode your setup to recover from failures and explore alternative trajectories.
