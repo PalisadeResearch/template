@@ -17,6 +17,7 @@ agent --no-logfire --no-git smoke
 ```
 
 By default the script is set up to uphold the policy of "keeping the receipts", so for now we're going to explicitly opt-out of that.
+The `--no-logfire` argument disables sending the entries, but you'd still see them in the console output.
 
 The thing should run, show some output and make a new folder named like `runs/01997...`.
 
@@ -171,7 +172,7 @@ Note that the new run has a fresh directory for its own stuff (here, `runs/01997
 It is a good time to commit the updated setup:
 
 ```sh
-git add src/ build.ninja pyproject.toml uv.
+git add src/ build.ninja pyproject.toml uv.lock
 git commit -m "Forking from template"
 ```
 
@@ -247,7 +248,7 @@ Traceback (most recent call last):
 ```
 
 Since "The scope" is nested inside the `run-tutorial-...`, it has access to the directory of the run (`runs/01998...`).
-We can pass that path to the context manager and and log the result:
+We can pass that path to the context manager and log the result:
 
 ```python
         with (
@@ -323,7 +324,7 @@ A few things to notice:
   The previous run is "finalized" and you can't "log more entries into it".
   The run that resulted from the restoration is effectively forked from its parent and has an isolated history.
 
-Divining into the files will reveal a few more details:
+Diving into the files will reveal a few more details:
 
 1. Inspecting the new `hey.txt` file will now show two "Hey!" lines.
 2. Its [metadata](./runs/019994d230bc7c9a083dd1560c4dcdc6/metadata.json) file has the single entry in its `ancestors`field, pointing to the run it were restored from.
@@ -395,7 +396,7 @@ Here we will use the file once more to go through the checklist for the "initial
 First, go to the [Env.py](./src/tutorial/agent/env.py) and add a new field to the `Metadata` class:
 
 ```python
-    # TODO: add more things to preseve and track across runs
+    # TODO: add more things to preserve and track across runs
     hey_name: str
 ```
 
@@ -457,6 +458,6 @@ Restore the modified run and see that the new non-default environment gets picke
 15:19:42.083     Closing runs/0199956a174abb8cb31891e142a92345/hola.txt
 ```
 
-In a realistic setup that would mean that e.g. your contnainers and network IPs got the values that match the agent's state.
+In a realistic setup that would mean that e.g. your containers and network IPs got the values that match the agent's state.
 
 Now you're equipped with an ability to encode your setup to recover from failures and explore alternative trajectories.
