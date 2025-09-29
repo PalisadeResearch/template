@@ -1,7 +1,7 @@
 # Agent template owners ~~manual~~ tutorial
 
-In this tutorial we will create and examine an LLM-based system that `TBD: running example`.
-Along the way we will use the extension points in the template code to add tools
+In this tutorial we will create and examine a basic setup that's using per-run workspaces to record the system state.
+We'll register and use a custom service handle and see what's needed to restore/fork it.
 
 ## 0. Smoke-testing
 
