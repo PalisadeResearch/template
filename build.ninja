@@ -1,6 +1,3 @@
-rule uv_sync
-  command = uv sync --all-extras --all-packages --dev
-
 rule hello
   command = uv run hello $out
 
@@ -11,12 +8,10 @@ rule latexmk
 rule typst_compile
   command = typst compile --ignore-system-fonts $in $out
 
-build .venv: uv_sync
-
 # TODO: replace the /template/ with the actual project name
-# XXX: Update when python or data dependencies change
-build paper-latex/hello.pdf: hello | .venv pyproject.toml src/template/hello.py src/template/stuff.py
-build paper-typst/hello.svg: hello | .venv pyproject.toml src/template/hello.py src/template/stuff.py
+# XXX: Update when data dependencies change
+build paper-latex/hello.pdf: hello | src/template/hello.py src/template/stuff.py
+build paper-typst/hello.svg: hello | src/template/hello.py src/template/stuff.py
 
 build figures: phony paper-latex/hello.pdf paper-typst/hello.svg
 
