@@ -1,3 +1,5 @@
+build python_deps: phony pyproject.toml uv.lock .python-version
+
 rule hello
   command = uv run hello $out
 
@@ -10,8 +12,8 @@ rule typst_compile
 
 # TODO: replace the /template/ with the actual project name
 # XXX: Update when data dependencies change
-build paper-latex/hello.pdf: hello | src/template/hello.py src/template/stuff.py
-build paper-typst/hello.svg: hello | src/template/hello.py src/template/stuff.py
+build paper-latex/hello.pdf: hello | python_deps src/template/hello.py src/template/stuff.py
+build paper-typst/hello.svg: hello | python_deps src/template/hello.py src/template/stuff.py
 
 build figures: phony paper-latex/hello.pdf paper-typst/hello.svg
 
