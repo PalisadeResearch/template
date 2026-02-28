@@ -91,6 +91,10 @@ ninja # builds figures and the paper
 git commit # checks format, lints, and type checks
 ```
 
+### Claude Code
+
+Default project settings in `.claude/settings.json` allow all bash commands sandboxed to the working directory and all network requests (`WebFetch`, `WebSearch`). This is a good balance between security and velocity. Override these in `.claude/settings.local.json` if you like.
+
 ### Files to know
 
 - `flake.nix` defines system dependencies like `texlive`
